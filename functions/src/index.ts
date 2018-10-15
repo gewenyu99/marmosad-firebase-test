@@ -7,26 +7,29 @@ import * as mysql from 'mysql';
 
 class Database {
     connection: any;
-    constructor( config ) {
-        this.connection = mysql.createConnection( config );
+
+    constructor(config) {
+        this.connection = mysql.createConnection(config);
     }
-    query( args ) {
-        return new Promise( ( resolve, reject ) => {
-            this.connection.query( args, ( err, rows ) => {
-                if ( err )
-                    return reject( err );
-                resolve( rows );
-            } );
-        } );
+
+    query(args) {
+        return new Promise((resolve, reject) => {
+            this.connection.query(args, (err, rows) => {
+                if (err)
+                    return reject(err);
+                resolve(rows);
+            });
+        });
     }
+
     close() {
-        return new Promise( ( resolve, reject ) => {
-            this.connection.end( err => {
-                if ( err )
-                    return reject( err );
+        return new Promise((resolve, reject) => {
+            this.connection.end(err => {
+                if (err)
+                    return reject(err);
                 resolve();
-            } );
-        } );
+            });
+        });
     }
 }
 
@@ -38,10 +41,32 @@ export const helloWorld = functions.https.onRequest((request, response) => {
         database: "cah"
     });
 
+    let whitecardsCount = 0;
+    let blackcardsCount = 0;
+
     marmoDB.query('SELECT COUNT(*) FROM whitecards').then((rows) => {
-        console.log(rows[0]["COUNT(*)"]);
-        response.status(200).send(rows[0]["COUNT(*)"]);
+        whitecardsCount = rows[0]["COUNT(*)"];
+    }).then(() => {
+        marmoDB.query('SELECT COUNT(*) FROM blackcards').then(
+            rows => {
+                blackcardsCount = rows[0]["COUNT(*)"];
+                f();
+            }
+        )
     }).catch(reason => {
-        response.send("nvm I failed")
+        console.log("I done goofed");
     });
+    let rsObject = [];
+
+    async function f(){
+        for (var i = 1; i <= whitecardsCount; i++) {
+            await marmoDB.query('SELECT * FROM whitecards WHERE id = ' + i).then(rows => {
+                console.log(rows[0]);
+                rsObject.push(rows[0]);
+                return;
+            });
+        }
+        response.status(200).send(rsObject);
+    }
 });
+
