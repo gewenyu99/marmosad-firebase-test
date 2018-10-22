@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "marmosad-application"
+    "default": "marmosad-application",
+    "marmodb": "marmodb"
   }
 }
